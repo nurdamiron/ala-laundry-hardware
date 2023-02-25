@@ -1,3 +1,7 @@
+#include <WiFi.h>
+#include <Firebase_ESP_Client.h>
+#include <addons/TokenHelper.h>
+#include <addons/RTDBHelper.h>
 #define WIFI_SSID "TechnoPark"
 #define WIFI_PASSWORD "techno2020"
 #define API_KEY "AIzaSyDV1GlR0n3e6oVAPE7dauJy09LQj-vcoXY"
