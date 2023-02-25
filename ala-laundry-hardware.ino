@@ -20,23 +20,21 @@ FirebaseJsonData door_status;
 
 int default_mode = 7;
 int local_on_off = 0;
-int local_run = 0;
 int local_start_stop = 0;
 int local_door_status = 0;
 int local_trigger = 0;
 
 // pins
-const int plus_pin = 2;     // button +
-//const int minus_pin = ;      // button -
 int encoder_pin_1 = 26; // encoder pin 1
 int encoder_pin_2 = 25; // encoder pin 2
 int on_off_pin = 14;    // on/off button
 int start_stop_pin = 27; // start/stop button
+int door_pin = 13; // sensor pin to detect if the door is open or closed, uses pin 13 to avoid conflicts with other pins
+
 int on_off_status = 0;
 int start_stop_status = 0;
 int washing_mode = 7; // 12 modes in total, default is mode 6
-int door_pin = 13; // sensor pin to detect if the door is open or closed, uses pin 13 to avoid conflicts with other pins
-int trigger_pin = 4;
+
 
 unsigned long send_data_prev_millis = 0;
 int count = 0;
@@ -61,22 +59,6 @@ void streamCallback(FirebaseStream data)
     local_trigger = trigger.to<int>();
     Serial.print("Wash trigger: ");
     Serial.println(local_trigger);
-  }
-
-  // Get door status value from Firebase
-  if (json->get(door_status, "door_status")) {
-    local_door_status = door_status.to<int>();
-    Serial.print("Door status: ");
-    Serial.println(local_door_status);
-
-    // If the washing trigger is true and the door is closed, start the washing process
-    if (local_trigger == 1 && local_door_status == 0) {
-      local_run = 1; // Set local_run to true to start the washing process
-      digitalWrite(trigger_pin, HIGH); // Turn on the trigger pin to activate the washing process
-    } else {
-      local_run = 0; // Set local_run to false to stop the washing process
-      digitalWrite(trigger_pin, LOW); // Turn off the trigger pin to stop the washing process
-    }
   }
   
 if (true) {
@@ -124,4 +106,3 @@ else {
 
 data_changed = true; // indicate that data has been changed
 }
-
