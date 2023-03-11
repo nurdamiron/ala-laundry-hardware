@@ -35,7 +35,6 @@ int on_off_status = 0;
 int start_stop_status = 0;
 int washing_mode = 7; // 12 modes in total, default is mode 6
 
-
 unsigned long send_data_prev_millis = 0;
 int count = 0;
 bool signup_ok = false;
