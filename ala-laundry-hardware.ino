@@ -1,4 +1,4 @@
-#include <WiFi.h>
+ #include <WiFi.h>
 #include <Firebase_ESP_Client.h>
 #include <addons/TokenHelper.h>
 #include <addons/RTDBHelper.h>
@@ -36,6 +36,7 @@ boolean ssMode = false;
 
 int washMode = 7;
 int washTrigger = 0;
+int setWashMode = 0;
 
 void IRAM_ATTR toggleWM()//прерывания для кнопки
 {
@@ -44,42 +45,6 @@ void IRAM_ATTR toggleWM()//прерывания для кнопки
   washMode = 7;
 }
 
-void streamCallback(FirebaseStream data)
-{
-  Serial.printf("stream path, %s\nevent path, %s\ndata type, %s\nevent type, %s\n\n",
-                data.streamPath().c_str(),
-                data.dataPath().c_str(),
-                data.dataType().c_str(),
-                data.eventType().c_str());
-  printResult(data); // see addons/RTDBHelper.h
-  Serial.println();
-  Serial.printf("Received stream payload size: %d (Max. %d)\n\n", data.payloadLength(), data.maxPayloadLength());
-
-  if(data.dataTypeEnum() == fb_esp_rtdb_data_type_json){
-    FirebaseJson *json = data.to<FirebaseJson *>();
-    
-    json->get(washModeJson, "mode");
-    json->get(washTriggerJson, "trigger");
-    
-    if(washModeJson.success){
-      washMode = washModeJson.to<int>();
-      Serial.println(washMode);
-    }
-    if(washTriggerJson.success){
-      washTrigger = washTriggerJson.to<int>();
-      Serial.println(washTrigger);
-    }
-    Serial.println("wash setup proccess");
-//    if(washTrigger){
-//      Serial.println("wash triggered");
-//      if(!onOffMode){
-////        toggleWMsingle();
-//      }
-//      setWashingMode(washMode);
-//      startStops();
-//    }
-  }
-}
 void streamTimeoutCallback(bool timeout)
 {
   if(timeout){
@@ -87,12 +52,12 @@ void streamTimeoutCallback(bool timeout)
     Serial.println("Stream timeout, resume streaming...");
   }  
 }
-//void toggleWMsingle()//прерывания для кнопки
-//{
-//  digitalWrite(14, !digitalRead(13));
-//  onOffMode = !onOffMode;
-//  washMode = 7;
-//}
+void toggleWMsingle()//прерывания для кнопки
+{
+  digitalWrite(14, !digitalRead(13));
+  onOffMode = !onOffMode;
+  washMode = 7;
+}
 void startStops()
 {
   ssMode = !ssMode;
@@ -145,19 +110,55 @@ void setWashingMode(int setWashValue)
   Serial.print("shift value:  ");
   Serial.println(shiftValue);
 }
+void streamCallback(FirebaseStream data)
+{
+  Serial.printf("stream path, %s\nevent path, %s\ndata type, %s\nevent type, %s\n\n",
+                data.streamPath().c_str(),
+                data.dataPath().c_str(),
+                data.dataType().c_str(),
+                data.eventType().c_str());
+  printResult(data); // see addons/RTDBHelper.h
+  Serial.println();
+  Serial.printf("Received stream payload size: %d (Max. %d)\n\n", data.payloadLength(), data.maxPayloadLength());
 
+  if(data.dataTypeEnum() == fb_esp_rtdb_data_type_json){
+    FirebaseJson *json = data.to<FirebaseJson *>();
+    
+    json->get(washModeJson, "mode");
+    json->get(washTriggerJson, "trigger");
+    
+    if(washModeJson.success){
+      setWashMode = washModeJson.to<int>();
+      Serial.print("washMode: ");
+      Serial.println(washMode);
+    }
+    if(washTriggerJson.success){
+      washTrigger = washTriggerJson.to<int>();
+      Serial.print("washTrigger: ");
+      Serial.println(washTrigger);
+    }
+  }
+  Serial.println("wash setup proccess");
+  if(washTrigger == 1){
+    Serial.println("wash triggered");
+    if(!onOffMode){
+      Serial.println("on or offed");
+      toggleWM();
+    }
+    setWashingMode(setWashMode);
+    startStops();
+  }
+}
 void setup()
 {
   Serial.begin(115200);
-  attachInterrupt(13, toggleWM, CHANGE);
   pinMode(OUTPUT_PIN_BUTTON,OUTPUT);
   pinMode(INPUT_PIN_BUTTON,INPUT_PULLUP);
-  pinMode(14,OUTPUT);
-  pinMode(13,INPUT_PULLUP);
   pinMode(outA,OUTPUT);
   pinMode(outB,OUTPUT);
   pinMode(startStop,OUTPUT);
   
+  attachInterrupt(13, toggleWM, CHANGE);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Connecting to Wi-Fi");
   while (WiFi.status() != WL_CONNECTED){
