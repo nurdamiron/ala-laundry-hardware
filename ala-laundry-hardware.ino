@@ -1,4 +1,6 @@
- #include <WiFi.h>
+#include "GyverButton.h"
+
+#include <WiFi.h>
 #include <Firebase_ESP_Client.h>
 #include <addons/TokenHelper.h>
 #include <addons/RTDBHelper.h>
@@ -38,12 +40,9 @@ int washMode = 7;
 int washTrigger = 0;
 int setWashMode = 0;
 
-void IRAM_ATTR toggleWM()//прерывания для кнопки
-{
-  digitalWrite(14, !digitalRead(13));
-  onOffMode = !onOffMode;
-  washMode = 7;
-}
+
+GButton but1(INPUT_PIN_BUTTON);
+
 
 void streamTimeoutCallback(bool timeout)
 {
@@ -52,17 +51,12 @@ void streamTimeoutCallback(bool timeout)
     Serial.println("Stream timeout, resume streaming...");
   }  
 }
-void toggleWMsingle()//прерывания для кнопки
-{
-  digitalWrite(14, !digitalRead(13));
-  onOffMode = !onOffMode;
-  washMode = 7;
-}
+
 void startStops()
 {
   ssMode = !ssMode;
   digitalWrite(startStop,HIGH);
-  delay(30);
+  delay(100);
   digitalWrite(startStop,LOW);
   Serial.println("StartStop");
 }
@@ -142,8 +136,15 @@ void streamCallback(FirebaseStream data)
   if(washTrigger == 1){
     Serial.println("wash triggered");
     if(!onOffMode){
-      Serial.println("on or offed");
-      toggleWM();
+      Serial.print("onOffMode: ");
+      Serial.println(onOffMode);
+      digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
+      Serial.println("HIGH: ");
+      delay(100);
+      Serial.println("LOW: ");
+      digitalWrite(OUTPUT_PIN_BUTTON, LOW);
+      onOffMode = !onOffMode;
+      delay(1500);
     }
     setWashingMode(setWashMode);
     startStops();
@@ -157,8 +158,6 @@ void setup()
   pinMode(outA,OUTPUT);
   pinMode(outB,OUTPUT);
   pinMode(startStop,OUTPUT);
-  
-  attachInterrupt(13, toggleWM, CHANGE);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Connecting to Wi-Fi");
   while (WiFi.status() != WL_CONNECTED){
@@ -200,4 +199,16 @@ void loop()
     // Firebase is ready to use now.
     
   } 
+  but1.tick();
+  if (but1.isClick()) {
+   Serial.print("onOffMode: ");
+   Serial.println(onOffMode);
+   digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
+   Serial.println("HIGH: ");
+   delay(100);
+   Serial.println("LOW: ");
+   digitalWrite(OUTPUT_PIN_BUTTON, LOW);
+   onOffMode = !onOffMode;
+   washMode=7;
+   }
 }
