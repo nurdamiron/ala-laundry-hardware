@@ -194,11 +194,20 @@ if (Firebase.signUp(&config, &auth, "", "")){
 
 void loop()
 {
- if (Firebase.ready())
-  {
-    // Firebase is ready to use now.
-    
-  } 
+ // Firebase.ready() should be called repeatedly to handle authentication tasks.
+  if (Firebase.ready() && (millis() - sendDataPrevMillis > 1500 || sendDataPrevMillis == 0)){
+    sendDataPrevMillis = millis();
+    if(Firebase.RTDB.setInt(&fbdo, "/id1/output/timer", sendDataPrevMillis)){
+      Serial.println("OK");
+    }else{
+      Serial.println(fbdo.errorReason());
+    }
+  }
+//  if (dataChanged)
+//  {
+//    dataChanged = false;
+//    // When stream data is available, do anything here...
+//  }
   but1.tick();
   if (but1.isClick()) {
    Serial.print("onOffMode: ");
