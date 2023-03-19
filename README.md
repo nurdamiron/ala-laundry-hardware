@@ -22,3 +22,44 @@ button wm|GPIO13|16|24|GPIO2|/
 /|SD3|18|22|SD1|/
 /|CMD|19|21|SD0|/
 /|V5|-|20|CLK|/
+###PCB
+{| class="wikitable" style="text-align: center;"
+!style="background: rgb(2, 148, 255);"|'''ala laundry pcb connector pinout'''
+!style="background: rgb(2, 148, 255);"| 
+|-
+|wm
+|esp
+|-
+|GND
+|GND
+|-
+|encoderA
+|25
+|-
+|encoderB
+|26
+|-
+|StartStop
+|27
+|-
+|OnOff
+|14
+|-
+|not used
+| 
+|-
+|Button OnOff
+|13
+|-
+|not used
+| 
+|-
+|not used
+| 
+|-
+|GND
+|GND
+|-
+|5V
+|5V
+|}
