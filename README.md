@@ -22,6 +22,7 @@ button wm|GPIO13|16|24|GPIO2|/
 /|SD3|18|22|SD1|/
 /|CMD|19|21|SD0|/
 /|V5|-|20|CLK|/
+
 ###PCB
 
 **ala laundry pcb**|**connector pinout**
