@@ -12,7 +12,7 @@
 //#define USER_PASSWORD "12345678"
 #define USER_EMAIL "USER_EMAIL"
 #define USER_PASSWORD "USER_PASSWORD"
-#define WM_MACHINE_STREAM_DIRECTORY "/id1/input"
+#define WM_MACHINE_STREAM_DIRECTORY "/id2/input"
 
 #define INPUT_PIN_BUTTON 13
 #define OUTPUT_PIN_BUTTON 14
@@ -33,6 +33,7 @@ bool signupOK = false;
 unsigned long count = 0;
 
 boolean onOffMode = false;
+boolean premOnOffMode = false;
 boolean ssMode = false;
 
 
@@ -197,7 +198,7 @@ void loop()
  // Firebase.ready() should be called repeatedly to handle authentication tasks.
   if (Firebase.ready() && (millis() - sendDataPrevMillis > 1500 || sendDataPrevMillis == 0)){
     sendDataPrevMillis = millis();
-    if(Firebase.RTDB.setInt(&fbdo, "/id1/output/timer", sendDataPrevMillis)){
+    if(Firebase.RTDB.setInt(&fbdo, "/id2/output/timer", sendDataPrevMillis)){
       Serial.println("OK");
     }else{
       Serial.println(fbdo.errorReason());
@@ -209,7 +210,7 @@ void loop()
 //    // When stream data is available, do anything here...
 //  }
   but1.tick();
-  if (but1.isClick()) {
+  if (but1.isClick() && premOnMode) {
    Serial.print("onOffMode: ");
    Serial.println(onOffMode);
    digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
