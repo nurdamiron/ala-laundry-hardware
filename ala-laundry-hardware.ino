@@ -124,8 +124,8 @@ void streamCallback(FirebaseStream data)
     json->get(washTriggerJson, "trigger");
     json->get(premOnOffModeJson, "admin");
     
-    if(premOnOffMode.success){
-      premOnOffMode = premOnOffMode.to<bool>();
+    if(premOnOffModeJson.success){
+      premOnOffMode = premOnOffModeJson.to<bool>();
       Serial.print("prem on off mode: ");
       Serial.println(premOnOffMode);
     }
