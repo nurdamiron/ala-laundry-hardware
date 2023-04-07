@@ -27,13 +27,14 @@ FirebaseConfig config;
 
 FirebaseJsonData washModeJson;
 FirebaseJsonData washTriggerJson;
+FirebaseJsonData premOnOffModeJson;
 
 unsigned long sendDataPrevMillis = 0;
 bool signupOK = false;
 unsigned long count = 0;
 
 boolean onOffMode = false;
-boolean premOnOffMode = false;
+bool premOnOffMode = false;
 boolean ssMode = false;
 
 
@@ -121,7 +122,13 @@ void streamCallback(FirebaseStream data)
     
     json->get(washModeJson, "mode");
     json->get(washTriggerJson, "trigger");
+    json->get(premOnOffModeJson, "admin");
     
+    if(premOnOffMode.success){
+      premOnOffMode = premOnOffMode.to<bool>();
+      Serial.print("prem on off mode: ");
+      Serial.println(premOnOffMode);
+    }
     if(washModeJson.success){
       setWashMode = washModeJson.to<int>();
       Serial.print("washMode: ");
@@ -210,7 +217,7 @@ void loop()
 //    // When stream data is available, do anything here...
 //  }
   but1.tick();
-  if (but1.isClick() && premOnMode) {
+  if (but1.isClick() && premOnOffMode) {
    Serial.print("onOffMode: ");
    Serial.println(onOffMode);
    digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
