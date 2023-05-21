@@ -1,4 +1,4 @@
-}unsigned long timing;
+unsigned long timing;
 boolean onOffMode = false;
 #include "GyverButton.h"
 
@@ -23,7 +23,8 @@ int washMode = 7;
 void encoderScroll(int scrollValue){
   if(scrollValue > 0){
     for(int i = 0 ; i < scrollValue+1; i++){
-      Serial.print("if: ");Serial.println(i);
+      Serial.print("Выполняеться скорл впередь по счету: ");
+      Serial.println(i);
       digitalWrite(outA, HIGH);
       delay(30);
       digitalWrite(outB, LOW);
@@ -37,7 +38,8 @@ void encoderScroll(int scrollValue){
   }
   else if(scrollValue < 0){
     for(int i = 0 ; i < abs(scrollValue)+1; i++){
-        Serial.print("elseif: ");Serial.println(i);
+      Serial.print("Выполняеться скорл назад, по счету: ");
+      Serial.println(i);
       digitalWrite(outB, HIGH);
       delay(30);
       digitalWrite(outA, LOW);
@@ -49,18 +51,18 @@ void encoderScroll(int scrollValue){
     }
     digitalWrite(outA, LOW);
   }
-  Serial.println("encoderScroll");
+  Serial.println("Конец метода скролиннга: ");
 }
 void setWashingMode(int setWashValue){
-  Serial.print("wash mode  ");
+  Serial.print("Режим который стоит: ");
   Serial.println(washMode);
   int shiftValue = washMode - setWashValue;
   washMode = setWashValue;
-  encoderScroll(shiftValue);
-  Serial.print("wash mode  ");
+  Serial.print("Режим который выбран: ");
   Serial.println(washMode);
-  Serial.print("shift value:  ");
+  Serial.print("На сколько делений должны перемещаться: ");
   Serial.println(shiftValue);
+  encoderScroll(shiftValue);
 }
 
 
@@ -68,7 +70,6 @@ void setWashingMode(int setWashValue){
 
 void setup() { 
   Serial.begin(115200);
-  // put your setup code here, to run once:
   pinMode(14,OUTPUT);
   pinMode(13,INPUT_PULLUP);
   pinMode(outA,OUTPUT);
@@ -79,13 +80,22 @@ void setup() {
 void loop() {
    but1.tick();
    if (but1.isClick()) {
-   Serial.print("onOffMode: ");
-   Serial.println(onOffMode);
-   digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
-   Serial.println("HIGH: ");
-   delay(100);
-   Serial.println("LOW: ");
-   digitalWrite(OUTPUT_PIN_BUTTON, LOW);
-   onOffMode = !onOffMode;
+     Serial.print("Текущее состоняие: ");
+     digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
+     Serial.println("HIGH: ");
+     delay(100);
+     Serial.println("LOW: ");
+     digitalWrite(OUTPUT_PIN_BUTTON, LOW);
+     onOffMode = !onOffMode;
    }
+   if (Serial.available() > 0) {
+     int number = Serial.parseInt();
+
+     if (number >= 0) {
+       // Выполнение условия при получении числа 1
+       Serial.println("Выполняется условие кручения энкодера");
+       // Вставьте здесь код, который должен выполняться при числе 1
+       
+    }
+  }
 }
