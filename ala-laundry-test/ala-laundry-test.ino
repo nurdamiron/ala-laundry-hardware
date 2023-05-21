@@ -78,24 +78,25 @@ void setup() {
 }
 
 void loop() {
-   but1.tick();
-   if (but1.isClick()) {
-     Serial.print("Текущее состоняие: ");
-     digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
-     Serial.println("HIGH: ");
-     delay(100);
-     Serial.println("LOW: ");
-     digitalWrite(OUTPUT_PIN_BUTTON, LOW);
-     onOffMode = !onOffMode;
-   }
-   if (Serial.available() > 0) {
-     int number = Serial.parseInt();
-
-     if (number >= 0) {
-       // Выполнение условия при получении числа 1
-       Serial.println("Выполняется условие кручения энкодера");
-       // Вставьте здесь код, который должен выполняться при числе 1
-       
+  but1.tick();
+  if (but1.isClick()) {
+    Serial.print("Текущее состоняие: ");
+    if(onOffMode = 0) ? Serial.println("отключен") : Serial.println("включен")
+    digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
+    delay(100);
+    digitalWrite(OUTPUT_PIN_BUTTON, LOW);
+    onOffMode = !onOffMode;
+  }
+  if (Serial.available() > 0) {
+    int number = Serial.parseInt();
+    int number = Serial.parseInt();
+    if (number >= 0) {
+      Serial.println("Выполняется условие кручения энкодера");
+      Serial.print("Значения аргумента ");
+      Serial.println(number)
+      setWashingMode(number);
     }
   }
 }
+
+
