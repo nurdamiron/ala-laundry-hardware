@@ -12,7 +12,7 @@
 //#define USER_PASSWORD "12345678"
 #define USER_EMAIL "USER_EMAIL"
 #define USER_PASSWORD "USER_PASSWORD"
-#define WM_MACHINE_STREAM_DIRECTORY "/id2/input"
+#define WM_MACHINE_STREAM_DIRECTORY "/id1/input"
 
 #define INPUT_PIN_BUTTON 13
 #define OUTPUT_PIN_BUTTON 14
@@ -156,6 +156,17 @@ void streamCallback(FirebaseStream data)
     }
     setWashingMode(setWashMode);
     startStops();
+  }else{
+    if(onOffMode){
+      Serial.print("onOffMode: ");
+      Serial.println(onOffMode);
+      digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
+      Serial.println("HIGH: ");
+      delay(100);
+      Serial.println("LOW: ");
+      digitalWrite(OUTPUT_PIN_BUTTON, LOW);
+      onOffMode = !onOffMode;
+    }
   }
 }
 void setup()
@@ -205,7 +216,7 @@ void loop()
  // Firebase.ready() should be called repeatedly to handle authentication tasks.
   if (Firebase.ready() && (millis() - sendDataPrevMillis > 1500 || sendDataPrevMillis == 0)){
     sendDataPrevMillis = millis();
-    if(Firebase.RTDB.setInt(&fbdo, "/id2/output/timer", sendDataPrevMillis)){
+    if(Firebase.RTDB.setInt(&fbdo, "/id1/output/timer", sendDataPrevMillis)){
       Serial.println("OK");
     }else{
       Serial.println(fbdo.errorReason());
