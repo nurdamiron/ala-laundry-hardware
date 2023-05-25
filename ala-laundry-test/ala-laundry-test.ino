@@ -1,15 +1,16 @@
 unsigned long timing;
-boolean onOffMode = false;
+
 #include "GyverButton.h"
 
-#define INPUT_PIN_BUTTON 13
+#define INPUT_PIN_BUTTON 13//для ускорения в Алекс гайвер сайтндай айтылган
 #define OUTPUT_PIN_BUTTON 14
+const int outB = 25;//либо const дегенды колдануга болады
+const int outA = 26;
+const int startStop = 27;
 GButton but1(INPUT_PIN_BUTTON);
-int outB = 25;
-int outA = 26;
-int startStop = 27;
-
-int washMode = 7;
+const int timeEncoder = 40;
+int washMode = 7;//стандартный режим при включения стиралки
+boolean onOffMode = false;//режим стиралки по умолчанию точнее выключена
 
 //void startStop(){
 //  startStopStatus = !startStopStatus;
@@ -26,30 +27,30 @@ void encoderScroll(int scrollValue){
       Serial.print("Выполняеться скорл впередь по счету: ");
       Serial.println(i);
       digitalWrite(outA, HIGH);
-      delay(30);
-      digitalWrite(outB, LOW);
-      delay(30);
-      digitalWrite(outA, LOW);
-      delay(30);
+      delay(timeEncoder);
       digitalWrite(outB, HIGH);
-      delay(30);
+      delay(timeEncoder);
+      digitalWrite(outA, LOW);
+      delay(timeEncoder);
+      digitalWrite(outB, LOW);
+      delay(timeEncoder);
     }
-    digitalWrite(outB, LOW);
+//    digitalWrite(outB, LOW);
   }
   else if(scrollValue < 0){
     for(int i = 0 ; i < abs(scrollValue)+1; i++){
       Serial.print("Выполняеться скорл назад, по счету: ");
       Serial.println(i);
       digitalWrite(outB, HIGH);
-      delay(30);
-      digitalWrite(outA, LOW);
-      delay(30);
-      digitalWrite(outB, LOW);
-      delay(30);
+      delay(timeEncoder);
       digitalWrite(outA, HIGH);
-      delay(30);
+      delay(timeEncoder);
+      digitalWrite(outB, LOW);
+      delay(timeEncoder);
+      digitalWrite(outA, LOW);
+      delay(timeEncoder);
     }
-    digitalWrite(outA, LOW);
+//    digitalWrite(outA, LOW);
   }
   Serial.println("Конец метода скролиннга: ");
 }
@@ -65,9 +66,6 @@ void setWashingMode(int setWashValue){
   encoderScroll(shiftValue);
 }
 
-
-
-
 void setup() { 
   Serial.begin(115200);
   pinMode(14,OUTPUT);
@@ -79,24 +77,30 @@ void setup() {
 
 void loop() {
   but1.tick();
-  if (but1.isClick()) {
+  if (but1.isPress()) {
     Serial.print("Текущее состоняие: ");
-    if(onOffMode = 0) ? Serial.println("отключен") : Serial.println("включен")
+    if(onOffMode == 0){
+      Serial.println("отключен");
+    }else{
+      Serial.println("включен");
+    }
     digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
-    delay(100);
+    delay(80);
     digitalWrite(OUTPUT_PIN_BUTTON, LOW);
     onOffMode = !onOffMode;
   }
   if (Serial.available() > 0) {
     int number = Serial.parseInt();
-    int number = Serial.parseInt();
-    if (number >= 0) {
+    int number1 = Serial.parseInt();
+    if (number >= 0 || number <= 0) {
       Serial.println("Выполняется условие кручения энкодера");
       Serial.print("Значения аргумента ");
-      Serial.println(number)
+      Serial.println(number);
       setWashingMode(number);
     }
   }
+//  setWashingMode(1);
+//  delay(1000);
+//  setWashingMode(16);
+//  delay(1000);
 }
-
-
