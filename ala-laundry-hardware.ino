@@ -19,6 +19,7 @@
 const int outB = 25;//либо const дегенды колдануга болады
 const int outA = 26;
 const int startStop = 27;
+const int timeEncoder = 100;
 
 FirebaseData stream;
 FirebaseData fbdo;
@@ -64,34 +65,34 @@ void startStops()
 }
 void encoderScroll(int scrollValue){
   if(scrollValue > 0){
-    for(int i = 0 ; i < scrollValue+1; i++){
+    for(int i = 0 ; i < scrollValue; i++){
       Serial.print("Выполняеться скорл впередь по счету: ");
       Serial.println(i);
       digitalWrite(outA, HIGH);
-      delay(30);
-      digitalWrite(outB, LOW);
-      delay(30);
-      digitalWrite(outA, LOW);
-      delay(30);
+      delay(timeEncoder);
       digitalWrite(outB, HIGH);
-      delay(60);
+      delay(timeEncoder);
+      digitalWrite(outA, LOW);
+      delay(timeEncoder);
+      digitalWrite(outB, LOW);
+      delay(timeEncoder);
     }
-    digitalWrite(outB, LOW);
+//    digitalWrite(outB, LOW);
   }
   else if(scrollValue < 0){
-    for(int i = 0 ; i < abs(scrollValue)+1; i++){
+    for(int i = 0 ; i < abs(scrollValue); i++){
       Serial.print("Выполняеться скорл назад, по счету: ");
       Serial.println(i);
       digitalWrite(outB, HIGH);
-      delay(30);
-      digitalWrite(outA, LOW);
-      delay(30);
-      digitalWrite(outB, LOW);
-      delay(30);
+      delay(timeEncoder);
       digitalWrite(outA, HIGH);
-      delay(60);
+      delay(timeEncoder);
+      digitalWrite(outB, LOW);
+      delay(timeEncoder);
+      digitalWrite(outA, LOW);
+      delay(timeEncoder);
     }
-    digitalWrite(outA, LOW);
+//    digitalWrite(outA, LOW);
   }
   Serial.println("Конец метода скролиннга: ");
 }
