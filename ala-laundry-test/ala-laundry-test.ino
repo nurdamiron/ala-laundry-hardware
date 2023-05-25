@@ -8,7 +8,7 @@ const int outB = 25;//либо const дегенды колдануга бола�
 const int outA = 26;
 const int startStop = 27;
 GButton but1(INPUT_PIN_BUTTON);
-const int timeEncoder = 40;
+const int timeEncoder = 100;
 int washMode = 7;//стандартный режим при включения стиралки
 boolean onOffMode = false;//режим стиралки по умолчанию точнее выключена
 
@@ -23,7 +23,7 @@ boolean onOffMode = false;//режим стиралки по умолчанию 
 
 void encoderScroll(int scrollValue){
   if(scrollValue > 0){
-    for(int i = 0 ; i < scrollValue+1; i++){
+    for(int i = 0 ; i < scrollValue; i++){
       Serial.print("Выполняеться скорл впередь по счету: ");
       Serial.println(i);
       digitalWrite(outA, HIGH);
@@ -38,7 +38,7 @@ void encoderScroll(int scrollValue){
 //    digitalWrite(outB, LOW);
   }
   else if(scrollValue < 0){
-    for(int i = 0 ; i < abs(scrollValue)+1; i++){
+    for(int i = 0 ; i < abs(scrollValue); i++){
       Serial.print("Выполняеться скорл назад, по счету: ");
       Serial.println(i);
       digitalWrite(outB, HIGH);
@@ -92,11 +92,17 @@ void loop() {
   if (Serial.available() > 0) {
     int number = Serial.parseInt();
     int number1 = Serial.parseInt();
-    if (number >= 0 || number <= 0) {
+    if (number >= 0) {
       Serial.println("Выполняется условие кручения энкодера");
       Serial.print("Значения аргумента ");
       Serial.println(number);
       setWashingMode(number);
+    }
+    else if(number <= 0){
+      for(int i = 0; i < 120; i++){
+        encoderScroll(1);
+//        delay(500);
+      }
     }
   }
 //  setWashingMode(1);
