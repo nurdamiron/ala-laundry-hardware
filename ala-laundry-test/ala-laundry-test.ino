@@ -101,7 +101,7 @@ void loop() {
     else if(number <= 0){
       for(int i = 0; i < 120; i++){
         encoderScroll(1);
-//        delay(500);
+        delay(500);
       }
     }
   }
