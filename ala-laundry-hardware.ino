@@ -120,9 +120,7 @@ void streamCallback(FirebaseStream data)
 
   if(data.dataTypeEnum() == fb_esp_rtdb_data_type_json){
     FirebaseJson *json = data.to<FirebaseJson *>();
-    
-    json->get(washModeJson, "mode");
-    json->get(washTriggerJson, "trigger");
+
     json->get(premOnOffModeJson, "admin");
     
     if(premOnOffModeJson.success){
@@ -130,47 +128,7 @@ void streamCallback(FirebaseStream data)
       Serial.print("prem on off mode: ");
       Serial.println(premOnOffMode);
     }
-    if(washModeJson.success){
-      setWashMode = washModeJson.to<int>();
-      Serial.print("washMode: ");
-      Serial.println(washMode);
-    }
-    if(washTriggerJson.success){
-      washTrigger = washTriggerJson.to<int>();
-      Serial.print("washTrigger: ");
-      Serial.println(washTrigger);
-    }
-  }
-  Serial.println("wash setup proccess");
-  if(washTrigger == 1){
-    Serial.println("wash triggered");
-    if(!onOffMode){
-      Serial.print("onOffMode: ");
-      Serial.println(onOffMode);
-      digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
-      Serial.println("HIGH: ");
-      delay(100);
-      Serial.println("LOW: ");
-      digitalWrite(OUTPUT_PIN_BUTTON, LOW);
-      onOffMode = !onOffMode;
-      delay(2500);
-    }
-    setWashingMode(setWashMode);
-    startStops();
-  }else{
-    if(onOffMode){
-      Serial.print("Функция через сериийний порт");
-      digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
-      delay(80);
-      digitalWrite(OUTPUT_PIN_BUTTON, LOW);
-      onOffMode = !onOffMode;
-      Serial.print("Текущее состоняие: ");
-      if(onOffMode == 0){
-        Serial.println("отключен");
-      }else{
-        Serial.println("включен");
-      }
-    }
+
   }
 }
 void setup()
@@ -242,13 +200,7 @@ void loop()
   if (Serial.available() > 0) {//Для ручной проверки
     int number = Serial.parseInt();
     int number1 = Serial.parseInt();// пробел
-    if (number >= 0) {
-      Serial.println("Выполняется условие кручения энкодера");
-      Serial.print("Значения аргумента ");
-      Serial.println(number);
-      setWashingMode(number);
-    }
-    else if(number == -1){
+    if(number == -1){
       Serial.print("Функция через сериийний порт");
       digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
       delay(80);
