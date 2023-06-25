@@ -63,39 +63,7 @@ void startStops()
   digitalWrite(startStop,LOW);
   Serial.println("StartStop");
 }
-void encoderScroll(int scrollValue){
-  if(scrollValue > 0){
-    for(int i = 0 ; i < scrollValue; i++){
-      Serial.print("Выполняеться скорл назад, по счету: ");
-      Serial.println(i);
-      digitalWrite(outB, HIGH);
-      delay(timeEncoder);
-      digitalWrite(outA, HIGH);
-      delay(timeEncoder);
-      digitalWrite(outB, LOW);
-      delay(timeEncoder);
-      digitalWrite(outA, LOW);
-      delay(timeEncoder);
-    }
-//    digitalWrite(outB, LOW);
-  }
-  else if(scrollValue < 0){
-    for(int i = 0 ; i < abs(scrollValue); i++){
-      Serial.print("Выполняеться скорл впередь по счету: ");
-      Serial.println(i);
-      digitalWrite(outA, HIGH);
-      delay(timeEncoder);
-      digitalWrite(outB, HIGH);
-      delay(timeEncoder);
-      digitalWrite(outA, LOW);
-      delay(timeEncoder);
-      digitalWrite(outB, LOW);
-      delay(timeEncoder);
-    }
-//    digitalWrite(outA, LOW);
-  }
-  Serial.println("Конец метода скролиннга: ");
-}
+
 void setWashingMode(int setWashValue){
   Serial.print("Режим который стоит: ");
   Serial.println(washMode);
