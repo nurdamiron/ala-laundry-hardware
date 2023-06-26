@@ -35,7 +35,7 @@ bool signupOK = false;
 unsigned long count = 0;
 
 boolean onOffMode = false;
-bool premOnOffMode = false;
+int premOnOffMode = 0;
 boolean ssMode = false;
 
 
@@ -124,11 +124,10 @@ void streamCallback(FirebaseStream data)
     json->get(premOnOffModeJson, "admin");
     
     if(premOnOffModeJson.success){
-      premOnOffMode = premOnOffModeJson.to<bool>();
+      premOnOffMode = premOnOffModeJson.to<int>();
       Serial.print("prem on off mode: ");
       Serial.println(premOnOffMode);
     }
-
   }
 }
 void setup()
@@ -179,7 +178,7 @@ void loop()
   if (Firebase.ready() && (millis() - sendDataPrevMillis > 1500 || sendDataPrevMillis == 0)){
     sendDataPrevMillis = millis();
     if(Firebase.RTDB.setInt(&fbdo, "/id5/output/timer", sendDataPrevMillis)){
-//      Serial.println("OK");
+      Serial.println(premOnOffMode);
     }else{
       Serial.println(fbdo.errorReason());
     }
@@ -187,33 +186,19 @@ void loop()
   but1.tick();
   if (but1.isPress()) {
     Serial.print("Текущее состоняие: ");
+    Serial.println(premOnOffMode);
     if(onOffMode == 0){
       Serial.println("отключен");
     }else{
       Serial.println("включен");
     }
-    digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
-    delay(80);
-    digitalWrite(OUTPUT_PIN_BUTTON, LOW);
-    onOffMode = !onOffMode;
-  }
-  if (Serial.available() > 0) {//Для ручной проверки
-    int number = Serial.parseInt();
-    int number1 = Serial.parseInt();// пробел
-    if(number == -1){
-      Serial.print("Функция через сериийний порт");
+    if(premOnOffMode){
       digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
       delay(80);
       digitalWrite(OUTPUT_PIN_BUTTON, LOW);
-      Serial.print("Текущее состоняие: ");
-      if(onOffMode == 0){
-        Serial.println("отключен");
-      }else{
-        Serial.println("включен");
-      }
+    }else{
+      Serial.println("Button is blocked");
     }
-    else if(number == -2){
-      startStops();
-    }
+    onOffMode = !onOffMode;
   }
 }
