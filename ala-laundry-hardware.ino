@@ -137,7 +137,7 @@ void streamCallback(FirebaseStream data)
       premOnOffMode = premOnOffModeJson.to<int>();
       Serial.print("prem on off mode: ");
       Serial.println(premOnOffMode);
-      if (premOnOffMode) {
+      if (premOnOffMode && door_door) {
         digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
         delay(100);
         digitalWrite(OUTPUT_PIN_BUTTON, LOW);
