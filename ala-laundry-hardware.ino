@@ -4,7 +4,7 @@
 #include <Firebase_ESP_Client.h>
 #include <addons/TokenHelper.h>
 #include <addons/RTDBHelper.h>
-#define WIFI_SSID "TechnoPark"  
+#define WIFI_SSID "TechnoPark"
 #define WIFI_PASSWORD "techno2020"
 #define API_KEY "AIzaSyB95Rp0pvwjcFi0dHEvvrRh0svfTkuL7MA"
 #define DATABASE_URL "https://ala-laundry-902e5-default-rtdb.firebaseio.com"
@@ -38,6 +38,16 @@ boolean onOffMode = false;
 int premOnOffMode = 0;
 boolean ssMode = false;
 
+boolean door_door = false;
+boolean prev_door_door = false;
+int doorPin = 36;
+
+int countB = 120;
+int arr[120];
+boolean door_closed = false;
+int max_d = 2000;
+int prevDoorState = 0;
+
 
 int washMode = 1;
 int washTrigger = 0;
@@ -49,23 +59,23 @@ GButton but1(INPUT_PIN_BUTTON);
 
 void streamTimeoutCallback(bool timeout)
 {
-  if(timeout){
+  if (timeout) {
     // Stream timeout occurred
     Serial.println("Stream timeout, resume streaming...");
-  }  
+  }
 }
 
 void startStops()
 {
   ssMode = !ssMode;
-  digitalWrite(startStop,HIGH);
+  digitalWrite(startStop, HIGH);
   delay(100);
-  digitalWrite(startStop,LOW);
+  digitalWrite(startStop, LOW);
   Serial.println("StartStop");
 }
-void encoderScroll(int scrollValue){
-  if(scrollValue > 0){
-    for(int i = 0 ; i < scrollValue; i++){
+void encoderScroll(int scrollValue) {
+  if (scrollValue > 0) {
+    for (int i = 0 ; i < scrollValue; i++) {
       Serial.print("Выполняеться скорл назад, по счету: ");
       Serial.println(i);
       digitalWrite(outB, HIGH);
@@ -77,10 +87,10 @@ void encoderScroll(int scrollValue){
       digitalWrite(outA, LOW);
       delay(timeEncoder);
     }
-//    digitalWrite(outB, LOW);
+    //    digitalWrite(outB, LOW);
   }
-  else if(scrollValue < 0){
-    for(int i = 0 ; i < abs(scrollValue); i++){
+  else if (scrollValue < 0) {
+    for (int i = 0 ; i < abs(scrollValue); i++) {
       Serial.print("Выполняеться скорл впередь по счету: ");
       Serial.println(i);
       digitalWrite(outA, HIGH);
@@ -92,11 +102,11 @@ void encoderScroll(int scrollValue){
       digitalWrite(outB, LOW);
       delay(timeEncoder);
     }
-//    digitalWrite(outA, LOW);
+    //    digitalWrite(outA, LOW);
   }
   Serial.println("Конец метода скролиннга: ");
 }
-void setWashingMode(int setWashValue){
+void setWashingMode(int setWashValue) {
   Serial.print("Режим который стоит: ");
   Serial.println(washMode);
   int shiftValue = washMode - setWashValue;
@@ -118,22 +128,22 @@ void streamCallback(FirebaseStream data)
   Serial.println();
   Serial.printf("Received stream payload size: %d (Max. %d)\n\n", data.payloadLength(), data.maxPayloadLength());
 
-  if(data.dataTypeEnum() == fb_esp_rtdb_data_type_json){
+  if (data.dataTypeEnum() == fb_esp_rtdb_data_type_json) {
     FirebaseJson *json = data.to<FirebaseJson *>();
 
     json->get(premOnOffModeJson, "admin");
-    
-    if(premOnOffModeJson.success){
+
+    if (premOnOffModeJson.success) {
       premOnOffMode = premOnOffModeJson.to<int>();
       Serial.print("prem on off mode: ");
       Serial.println(premOnOffMode);
-      if(premOnOffMode){
-      digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
-      delay(80);
-      digitalWrite(OUTPUT_PIN_BUTTON, LOW);
-    }else{
-      Serial.println("Button is blocked");
-    }
+      if (premOnOffMode) {
+        digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
+        delay(100);
+        digitalWrite(OUTPUT_PIN_BUTTON, LOW);
+      } else {
+        Serial.println("Button is blocked");
+      }
     }
   }
 }
@@ -141,17 +151,23 @@ void streamCallback(FirebaseStream data)
 void setup()
 {
   Serial.begin(115200);
-  pinMode(OUTPUT_PIN_BUTTON,OUTPUT);
-  pinMode(INPUT_PIN_BUTTON,INPUT_PULLUP);
-  pinMode(outA,OUTPUT);
-  pinMode(outB,OUTPUT);
-  pinMode(startStop,OUTPUT);
+  pinMode(OUTPUT_PIN_BUTTON, OUTPUT);
+  pinMode(INPUT_PIN_BUTTON, INPUT_PULLUP);
+  pinMode(outA, OUTPUT);
+  pinMode(outB, OUTPUT);
+  pinMode(startStop, OUTPUT);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Connecting to Wi-Fi");
-  while (WiFi.status() != WL_CONNECTED){
+  while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
     delay(300);
   }
+
+  for (int i = 0; i < countB; i++)
+    arr[i] = 0;
+
+  pinMode(doorPin, INPUT);
+
   Serial.println();
   Serial.print("Connected with IP: ");
   Serial.println(WiFi.localIP());
@@ -159,15 +175,15 @@ void setup()
 
   Serial.printf("Firebase Client v%s\n\n", FIREBASE_CLIENT_VERSION);
   config.api_key = API_KEY;
-  
+
   /* Assign the RTDB URL (required) */
   config.database_url = DATABASE_URL;
 
-if (Firebase.signUp(&config, &auth, "", "")){
+  if (Firebase.signUp(&config, &auth, "", "")) {
     Serial.println("ok");
     signupOK = true;
   }
-  else{
+  else {
     Serial.printf("%s\n", config.signer.signupError.message.c_str());
   }
 
@@ -178,39 +194,89 @@ if (Firebase.signUp(&config, &auth, "", "")){
   if (!Firebase.RTDB.beginStream(&stream, WM_MACHINE_STREAM_DIRECTORY))
     Serial.printf("stream begin error, %s\n\n", stream.errorReason().c_str());
   Firebase.RTDB.setStreamCallback(&stream, streamCallback, streamTimeoutCallback);
+
+
+  if(Firebase.ready()){
+     for (int i = 0; i < countB; i++) {
+      arr[i] = analogRead(doorPin);
+      if (arr[i] > max_d)door_closed = true;
+      delay(10);
+
+    }
+    Serial.print(analogRead(doorPin)); Serial.print("-"); Serial.println(door_closed);
+
+    door_door = door_closed;
+
+    if (door_door != prev_door_door) {
+      if (Firebase.RTDB.setBool(&fbdo, "/id4/output/door_status", door_door)) {
+        if (door_door)Serial.println("Door state is sended-TRUE");
+        else Serial.println("Door state is sended-FALSE");
+        Serial.println(premOnOffMode);
+      }
+      else {
+        Serial.println(fbdo.errorReason());
+        Serial.println("Door state is not sended");
+      }
+
+      prev_door_door = door_door;
+    }
+
+    door_closed = false;
+    }
 }
 
-void loop()
-{
- // Firebase.ready() should be called repeatedly to handle authentication tasks.
-  if (Firebase.ready() && (millis() - sendDataPrevMillis > 1500 || sendDataPrevMillis == 0)){
-    
+void loop() {
+  // Firebase.ready() should be called repeatedly to handle authentication tasks.
+  if (Firebase.ready() && (millis() - sendDataPrevMillis > 2500 || sendDataPrevMillis == 0)) {
+
     sendDataPrevMillis = millis();
-    if(Firebase.RTDB.setInt(&fbdo, "/id4/output/timer", sendDataPrevMillis)){
+    if (Firebase.RTDB.setInt(&fbdo, "/id4/output/timer", sendDataPrevMillis)) {
       Serial.println(premOnOffMode);
-    }else{
+    } else {
       Serial.println(fbdo.errorReason());
     }
-    if(Firebase.RTDB.setBool(&fbdo, "/id4/output/door_status", sendDataPrevMillis)){
-      Serial.println(premOnOffMode);
-    }else{
-      Serial.println(fbdo.errorReason());
+
+
+    for (int i = 0; i < countB; i++) {
+      arr[i] = analogRead(doorPin);
+      if (arr[i] > max_d)door_closed = true;
+      delay(10);
+
     }
+    Serial.print(analogRead(doorPin)); Serial.print("-"); Serial.println(door_closed);
+
+    door_door = door_closed;
+
+    if (door_door != prev_door_door) {
+      if (Firebase.RTDB.setBool(&fbdo, "/id4/output/door_status", door_door)) {
+        if (door_door)Serial.println("Door state is sended-TRUE");
+        else Serial.println("Door state is sended-FALSE");
+        Serial.println(premOnOffMode);
+      }
+      else {
+        Serial.println(fbdo.errorReason());
+        Serial.println("Door state is not sended");
+      }
+
+      prev_door_door = door_door;
+    }
+
+    door_closed = false;
   }
   but1.tick();
   if (but1.isPress()) {
     Serial.print("Текущее состоняие: ");
     Serial.println(premOnOffMode);
-    if(onOffMode == 0){
+    if (onOffMode == 0) {
       Serial.println("отключен");
-    }else{
+    } else {
       Serial.println("включен");
     }
-    if(premOnOffMode){
+    if (premOnOffMode) {
       digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
-      delay(80);
+      delay(100);
       digitalWrite(OUTPUT_PIN_BUTTON, LOW);
-    }else{
+    } else {
       Serial.println("Button is blocked");
     }
     onOffMode = !onOffMode;
