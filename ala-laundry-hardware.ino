@@ -12,7 +12,7 @@
 //#define USER_PASSWORD "12345678"
 #define USER_EMAIL "USER_EMAIL"
 #define USER_PASSWORD "USER_PASSWORD"
-#define WM_MACHINE_STREAM_DIRECTORY "/id5/input"
+#define WM_MACHINE_STREAM_DIRECTORY "/id4/input"
 
 #define INPUT_PIN_BUTTON 13
 #define OUTPUT_PIN_BUTTON 14
@@ -63,50 +63,50 @@ void startStops()
   digitalWrite(startStop,LOW);
   Serial.println("StartStop");
 }
-//void encoderScroll(int scrollValue){
-//  if(scrollValue > 0){
-//    for(int i = 0 ; i < scrollValue; i++){
-//      Serial.print("Выполняеться скорл назад, по счету: ");
-//      Serial.println(i);
-//      digitalWrite(outB, HIGH);
-//      delay(timeEncoder);
-//      digitalWrite(outA, HIGH);
-//      delay(timeEncoder);
-//      digitalWrite(outB, LOW);
-//      delay(timeEncoder);
-//      digitalWrite(outA, LOW);
-//      delay(timeEncoder);
-//    }
-////    digitalWrite(outB, LOW);
-//  }
-//  else if(scrollValue < 0){
-//    for(int i = 0 ; i < abs(scrollValue); i++){
-//      Serial.print("Выполняеться скорл впередь по счету: ");
-//      Serial.println(i);
-//      digitalWrite(outA, HIGH);
-//      delay(timeEncoder);
-//      digitalWrite(outB, HIGH);
-//      delay(timeEncoder);
-//      digitalWrite(outA, LOW);
-//      delay(timeEncoder);
-//      digitalWrite(outB, LOW);
-//      delay(timeEncoder);
-//    }
-////    digitalWrite(outA, LOW);
-//  }
-//  Serial.println("Конец метода скролиннга: ");
-//}
-//void setWashingMode(int setWashValue){
-//  Serial.print("Режим который стоит: ");
-//  Serial.println(washMode);
-//  int shiftValue = washMode - setWashValue;
-//  washMode = setWashValue;
-//  Serial.print("Режим который выбран: ");
-//  Serial.println(washMode);
-//  Serial.print("На сколько делений должны перемещаться: ");
-//  Serial.println(shiftValue);
-//  encoderScroll(shiftValue);
-//}
+void encoderScroll(int scrollValue){
+  if(scrollValue > 0){
+    for(int i = 0 ; i < scrollValue; i++){
+      Serial.print("Выполняеться скорл назад, по счету: ");
+      Serial.println(i);
+      digitalWrite(outB, HIGH);
+      delay(timeEncoder);
+      digitalWrite(outA, HIGH);
+      delay(timeEncoder);
+      digitalWrite(outB, LOW);
+      delay(timeEncoder);
+      digitalWrite(outA, LOW);
+      delay(timeEncoder);
+    }
+//    digitalWrite(outB, LOW);
+  }
+  else if(scrollValue < 0){
+    for(int i = 0 ; i < abs(scrollValue); i++){
+      Serial.print("Выполняеться скорл впередь по счету: ");
+      Serial.println(i);
+      digitalWrite(outA, HIGH);
+      delay(timeEncoder);
+      digitalWrite(outB, HIGH);
+      delay(timeEncoder);
+      digitalWrite(outA, LOW);
+      delay(timeEncoder);
+      digitalWrite(outB, LOW);
+      delay(timeEncoder);
+    }
+//    digitalWrite(outA, LOW);
+  }
+  Serial.println("Конец метода скролиннга: ");
+}
+void setWashingMode(int setWashValue){
+  Serial.print("Режим который стоит: ");
+  Serial.println(washMode);
+  int shiftValue = washMode - setWashValue;
+  washMode = setWashValue;
+  Serial.print("Режим который выбран: ");
+  Serial.println(washMode);
+  Serial.print("На сколько делений должны перемещаться: ");
+  Serial.println(shiftValue);
+  encoderScroll(shiftValue);
+}
 void streamCallback(FirebaseStream data)
 {
   Serial.printf("stream path, %s\nevent path, %s\ndata type, %s\nevent type, %s\n\n",
@@ -127,9 +127,17 @@ void streamCallback(FirebaseStream data)
       premOnOffMode = premOnOffModeJson.to<int>();
       Serial.print("prem on off mode: ");
       Serial.println(premOnOffMode);
+      if(premOnOffMode){
+      digitalWrite(OUTPUT_PIN_BUTTON, HIGH);
+      delay(80);
+      digitalWrite(OUTPUT_PIN_BUTTON, LOW);
+    }else{
+      Serial.println("Button is blocked");
+    }
     }
   }
 }
+
 void setup()
 {
   Serial.begin(115200);
@@ -176,8 +184,14 @@ void loop()
 {
  // Firebase.ready() should be called repeatedly to handle authentication tasks.
   if (Firebase.ready() && (millis() - sendDataPrevMillis > 1500 || sendDataPrevMillis == 0)){
+    
     sendDataPrevMillis = millis();
-    if(Firebase.RTDB.setInt(&fbdo, "/id5/output/timer", sendDataPrevMillis)){
+    if(Firebase.RTDB.setInt(&fbdo, "/id4/output/timer", sendDataPrevMillis)){
+      Serial.println(premOnOffMode);
+    }else{
+      Serial.println(fbdo.errorReason());
+    }
+    if(Firebase.RTDB.setBool(&fbdo, "/id4/output/door_status", sendDataPrevMillis)){
       Serial.println(premOnOffMode);
     }else{
       Serial.println(fbdo.errorReason());
@@ -200,5 +214,15 @@ void loop()
       Serial.println("Button is blocked");
     }
     onOffMode = !onOffMode;
+  }
+  if (Serial.available() > 0) {//Для ручной проверки
+    int number = Serial.parseInt();
+    int number1 = Serial.parseInt();// пробел
+    if (number >= 0) {
+      Serial.println("Выполняется условие кручения энкодера");
+      Serial.print("Значения аргумента ");
+      Serial.println(number);
+      setWashingMode(number);
+    }
   }
 }
